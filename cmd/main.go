@@ -24,6 +24,7 @@ func main() {
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("POST /api/inbox", InboxController.CreateInbox)
+	mux.HandleFunc("GET /api/inbox/{id}/emails", InboxController.GetEmailsByInboxId)
 
 	server := &http.Server{
 		Addr:    ":8080",

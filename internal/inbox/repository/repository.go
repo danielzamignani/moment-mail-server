@@ -29,3 +29,39 @@ func (ir *InboxRepository) CreateInbox(inbox model.Inbox) error {
 
 	return nil
 }
+
+func (ir *InboxRepository) GetEmailsByInboxId(inboxId string) ([]model.EmailSummary, error) {
+	const query = `
+        SELECT id, sender, subject, received_at
+        FROM emails
+        WHERE inbox_id = $1
+        ORDER BY received_at DESC
+    `
+
+	rows, err := ir.connection.Query(context.Background(), query, inboxId)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get emails from inbox %s: %w", inboxId, err)
+	}
+	defer rows.Close()
+
+	summaries := make([]model.EmailSummary, 0)
+
+	for rows.Next() {
+		var s model.EmailSummary
+		if err := rows.Scan(
+			&s.ID,
+			&s.Sender,
+			&s.Subject,
+			&s.RecievedAt,
+		); err != nil {
+			return nil, fmt.Errorf("failed to scan email summary: %w", err)
+		}
+		summaries = append(summaries, s)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("error iterating email rows: %w", err)
+	}
+
+	return summaries, nil
+}

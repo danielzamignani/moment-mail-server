@@ -4,4 +4,5 @@ import "moment-mail-server/internal/inbox/model"
 
 type InboxUseCase interface {
 	CreateInbox() (model.Inbox, error)
+	GetEmailsByInboxId() ([]model.EmailSummary, error)
 }

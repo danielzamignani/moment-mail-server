@@ -39,3 +39,12 @@ func (iu *InboxUseCase) CreateInbox() (model.Inbox, error) {
 
 	return res, nil
 }
+
+func (iu *InboxUseCase) GetEmailsByInboxId(inboxId string) ([]model.EmailSummary, error) {
+	emails, err := iu.repository.GetEmailsByInboxId(inboxId)
+	if err != nil {
+		return []model.EmailSummary{}, err
+	}
+
+	return emails, nil
+}
