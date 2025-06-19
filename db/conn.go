@@ -18,7 +18,7 @@ func ConnectDB() *pgxpool.Pool {
 	dbname := os.Getenv("DB_NAME")
 
 	encodedPassword := url.QueryEscape(password)
-	connStr := fmt.Sprintf("postgres://%s:%s@%s:%s/%s",
+	connStr := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable",
 		user, encodedPassword, host, port, dbname)
 
 	dbpool, err := pgxpool.New(context.Background(), connStr)

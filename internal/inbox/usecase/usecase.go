@@ -3,18 +3,17 @@ package usecase
 import (
 	"fmt"
 	"math/rand"
-	"moment-mail-server/model"
-	"moment-mail-server/repository"
+	"moment-mail-server/internal/inbox/model"
 	"time"
 
 	"github.com/google/uuid"
 )
 
 type InboxUseCase struct {
-	repository *repository.InboxRepository
+	repository InboxRepository
 }
 
-func NewInboxUseCase(repository *repository.InboxRepository) InboxUseCase {
+func NewInboxUseCase(repository InboxRepository) InboxUseCase {
 	return InboxUseCase{
 		repository: repository,
 	}

@@ -2,7 +2,7 @@ package controller
 
 import (
 	"encoding/json"
-	"moment-mail-server/usecase"
+	"moment-mail-server/internal/inbox/usecase"
 	"net/http"
 )
 

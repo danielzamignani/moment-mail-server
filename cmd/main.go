@@ -2,10 +2,10 @@ package main
 
 import (
 	"log"
-	"moment-mail-server/controller"
 	"moment-mail-server/db"
-	"moment-mail-server/repository"
-	"moment-mail-server/usecase"
+	"moment-mail-server/internal/inbox/controller"
+	"moment-mail-server/internal/inbox/repository"
+	"moment-mail-server/internal/inbox/usecase"
 	"net/http"
 
 	"github.com/joho/godotenv"

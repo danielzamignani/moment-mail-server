@@ -3,7 +3,7 @@ package repository
 import (
 	"context"
 	"fmt"
-	"moment-mail-server/model"
+	"moment-mail-server/internal/inbox/model"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
