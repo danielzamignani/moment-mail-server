@@ -30,7 +30,7 @@ func (ir *InboxRepository) CreateInbox(inbox model.Inbox) error {
 	return nil
 }
 
-func (ir *InboxRepository) GetEmailsByInboxId(inboxId string, limit int, offset int) ([]model.Email, error) {
+func (ir *InboxRepository) GetEmailSummaries(inboxId string, limit int, offset int) ([]model.Email, error) {
 	const query = `
         SELECT id, sender, subject, received_at
         FROM emails

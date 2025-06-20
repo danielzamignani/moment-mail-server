@@ -5,7 +5,7 @@ import (
 	"moment-mail-server/db"
 	"moment-mail-server/internal/inbox/controller"
 	"moment-mail-server/internal/inbox/repository"
-	"moment-mail-server/internal/inbox/usecase"
+	"moment-mail-server/internal/inbox/service"
 	"net/http"
 
 	"github.com/joho/godotenv"
@@ -19,12 +19,12 @@ func main() {
 
 	dbConnection := db.ConnectDB()
 	InboxRepository := repository.NewInboxRepository(dbConnection)
-	InboxUseCase := usecase.NewInboxUseCase(InboxRepository)
-	InboxController := controller.NewInboxController(InboxUseCase)
+	InboxService := service.NewInboxService(InboxRepository)
+	InboxController := controller.NewInboxController(InboxService)
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("POST /api/inbox", InboxController.CreateInbox)
-	mux.HandleFunc("GET /api/inbox/{id}/emails", InboxController.GetEmailsByInboxId)
+	mux.HandleFunc("GET /api/inbox/{id}/emails", InboxController.GetEmailSummaries)
 
 	server := &http.Server{
 		Addr:    ":8080",
