@@ -30,15 +30,16 @@ func (ir *InboxRepository) CreateInbox(inbox model.Inbox) error {
 	return nil
 }
 
-func (ir *InboxRepository) GetEmailsByInboxId(inboxId string) ([]model.EmailSummary, error) {
+func (ir *InboxRepository) GetEmailsByInboxId(inboxId string, limit int, offset int) ([]model.EmailSummary, error) {
 	const query = `
         SELECT id, sender, subject, received_at
         FROM emails
         WHERE inbox_id = $1
         ORDER BY received_at DESC
+		LIMIT $2 OFFSET $3
     `
 
-	rows, err := ir.connection.Query(context.Background(), query, inboxId)
+	rows, err := ir.connection.Query(context.Background(), query, inboxId, limit, offset)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get emails from inbox %s: %w", inboxId, err)
 	}

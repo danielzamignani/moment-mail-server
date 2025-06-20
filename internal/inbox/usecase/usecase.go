@@ -13,8 +13,8 @@ type InboxUseCase struct {
 	repository InboxRepository
 }
 
-func NewInboxUseCase(repository InboxRepository) InboxUseCase {
-	return InboxUseCase{
+func NewInboxUseCase(repository InboxRepository) *InboxUseCase {
+	return &InboxUseCase{
 		repository: repository,
 	}
 }
@@ -40,8 +40,8 @@ func (iu *InboxUseCase) CreateInbox() (model.Inbox, error) {
 	return res, nil
 }
 
-func (iu *InboxUseCase) GetEmailsByInboxId(inboxId string) ([]model.EmailSummary, error) {
-	emails, err := iu.repository.GetEmailsByInboxId(inboxId)
+func (iu *InboxUseCase) GetEmailsByInboxId(inboxId string, limit int, offset int) ([]model.EmailSummary, error) {
+	emails, err := iu.repository.GetEmailsByInboxId(inboxId, limit, offset)
 	if err != nil {
 		return []model.EmailSummary{}, err
 	}
