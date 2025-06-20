@@ -1,4 +1,4 @@
-package usecase
+package service
 
 import (
 	"fmt"
@@ -10,17 +10,17 @@ import (
 	"github.com/google/uuid"
 )
 
-type InboxUseCase struct {
+type InboxService struct {
 	repository InboxRepository
 }
 
-func NewInboxUseCase(repository InboxRepository) *InboxUseCase {
-	return &InboxUseCase{
+func NewInboxService(repository InboxRepository) *InboxService {
+	return &InboxService{
 		repository: repository,
 	}
 }
 
-func (iu *InboxUseCase) CreateInbox() (model.Inbox, error) {
+func (iu *InboxService) CreateInbox() (model.Inbox, error) {
 	uuid, _ := uuid.NewUUID()
 	emailUsername := fmt.Sprintf("tempuser%d", rand.Intn(100000))
 	domainName := "momentmail.com"
@@ -41,7 +41,7 @@ func (iu *InboxUseCase) CreateInbox() (model.Inbox, error) {
 	return res, nil
 }
 
-func (iu *InboxUseCase) GetEmailsByInboxId(inboxId string, limit int, offset int) ([]dto.EmailSummary, error) {
+func (iu *InboxService) GetEmailSummaries(inboxId string, limit int, offset int) ([]dto.EmailSummary, error) {
 	emails, err := iu.repository.GetEmailsByInboxId(inboxId, limit, offset)
 	if err != nil {
 		return []dto.EmailSummary{}, err

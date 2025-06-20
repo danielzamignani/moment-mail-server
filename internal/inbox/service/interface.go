@@ -1,4 +1,4 @@
-package usecase
+package service
 
 import "moment-mail-server/internal/inbox/model"
 

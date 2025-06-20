@@ -8,17 +8,17 @@ import (
 )
 
 type inboxController struct {
-	inboxUseCase InboxUseCase
+	inboxService InboxService
 }
 
-func NewInboxController(usecase InboxUseCase) inboxController {
+func NewInboxController(service InboxService) inboxController {
 	return inboxController{
-		inboxUseCase: usecase,
+		inboxService: service,
 	}
 }
 
 func (i *inboxController) CreateInbox(w http.ResponseWriter, r *http.Request) {
-	inbox, err := i.inboxUseCase.CreateInbox()
+	inbox, err := i.inboxService.CreateInbox()
 	if err != nil {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusCreated)
@@ -34,7 +34,7 @@ func (i *inboxController) CreateInbox(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(inbox)
 }
 
-func (i *inboxController) GetEmailsByInboxId(w http.ResponseWriter, r *http.Request) {
+func (i *inboxController) GetEmailSummaries(w http.ResponseWriter, r *http.Request) {
 	inboxId := r.PathValue("id")
 	query := r.URL.Query()
 
@@ -50,7 +50,7 @@ func (i *inboxController) GetEmailsByInboxId(w http.ResponseWriter, r *http.Requ
 
 	offset := (page - 1) * limit
 
-	res, err := i.inboxUseCase.GetEmailsByInboxId(inboxId, limit, offset)
+	res, err := i.inboxService.GetEmailSummaries(inboxId, limit, offset)
 	if err != nil {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusInternalServerError)

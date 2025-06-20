@@ -5,7 +5,7 @@ import (
 	"moment-mail-server/internal/inbox/model"
 )
 
-type InboxUseCase interface {
+type InboxService interface {
 	CreateInbox() (model.Inbox, error)
-	GetEmailsByInboxId(inboxId string, limit int, offset int) ([]dto.EmailSummary, error)
+	GetEmailSummaries(inboxId string, limit int, offset int) ([]dto.EmailSummary, error)
 }
