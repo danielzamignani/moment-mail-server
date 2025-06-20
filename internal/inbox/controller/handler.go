@@ -71,3 +71,24 @@ func (i *inboxController) GetEmailSummaries(w http.ResponseWriter, r *http.Reque
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(response)
 }
+
+func (i *inboxController) GetEmail(w http.ResponseWriter, r *http.Request) {
+	emailId := r.PathValue("id")
+
+	res, err := i.inboxService.GetEmail(emailId)
+	if err != nil {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{
+			"message": err.Error(),
+		})
+
+		return
+	}
+
+	response := res
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(response)
+}

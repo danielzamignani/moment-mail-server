@@ -66,3 +66,27 @@ func (ir *InboxRepository) GetEmailSummaries(inboxId string, limit int, offset i
 
 	return summaries, nil
 }
+
+func (ir *InboxRepository) GetEmail(emailId string) (model.Email, error) {
+	const query = `
+		SELECT id, received_at, sender, subject, body
+		FROM emails
+		WHERE id = $1
+	`
+
+	row := ir.connection.QueryRow(context.Background(), query, emailId)
+	var email model.Email
+	if err := row.Scan(
+		&email.ID,
+		&email.RecievedAt,
+		&email.Sender,
+		&email.Subject,
+		&email.Body,
+	); err != nil {
+		return model.Email{}, fmt.Errorf("failed to scan email summary: %w", err)
+	}
+
+	println(email.Body)
+
+	return email, nil
+}

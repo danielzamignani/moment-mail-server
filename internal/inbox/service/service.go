@@ -59,3 +59,20 @@ func (iu *InboxService) GetEmailSummaries(inboxId string, limit int, offset int)
 
 	return summaries, nil
 }
+
+func (iu *InboxService) GetEmail(emailId string) (dto.Email, error) {
+	emailModel, err := iu.repository.GetEmail(emailId)
+	if err != nil {
+		return dto.Email{}, err
+	}
+
+	email := dto.Email{
+		ID:         emailModel.ID,
+		Subject:    emailModel.Subject,
+		Sender:     emailModel.Sender,
+		RecievedAt: emailModel.RecievedAt,
+		Body:       emailModel.Body,
+	}
+
+	return email, nil
+}
