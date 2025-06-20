@@ -3,6 +3,7 @@ package usecase
 import (
 	"fmt"
 	"math/rand"
+	"moment-mail-server/internal/inbox/dto"
 	"moment-mail-server/internal/inbox/model"
 	"time"
 
@@ -40,11 +41,21 @@ func (iu *InboxUseCase) CreateInbox() (model.Inbox, error) {
 	return res, nil
 }
 
-func (iu *InboxUseCase) GetEmailsByInboxId(inboxId string, limit int, offset int) ([]model.EmailSummary, error) {
+func (iu *InboxUseCase) GetEmailsByInboxId(inboxId string, limit int, offset int) ([]dto.EmailSummary, error) {
 	emails, err := iu.repository.GetEmailsByInboxId(inboxId, limit, offset)
 	if err != nil {
-		return []model.EmailSummary{}, err
+		return []dto.EmailSummary{}, err
 	}
 
-	return emails, nil
+	summaries := make([]dto.EmailSummary, len(emails))
+	for i, email := range emails {
+		summaries[i] = dto.EmailSummary{
+			ID:         email.ID,
+			Subject:    email.Subject,
+			Sender:     email.Sender,
+			RecievedAt: email.RecievedAt,
+		}
+	}
+
+	return summaries, nil
 }

@@ -30,7 +30,7 @@ func (ir *InboxRepository) CreateInbox(inbox model.Inbox) error {
 	return nil
 }
 
-func (ir *InboxRepository) GetEmailsByInboxId(inboxId string, limit int, offset int) ([]model.EmailSummary, error) {
+func (ir *InboxRepository) GetEmailsByInboxId(inboxId string, limit int, offset int) ([]model.Email, error) {
 	const query = `
         SELECT id, sender, subject, received_at
         FROM emails
@@ -45,10 +45,10 @@ func (ir *InboxRepository) GetEmailsByInboxId(inboxId string, limit int, offset 
 	}
 	defer rows.Close()
 
-	summaries := make([]model.EmailSummary, 0)
+	summaries := make([]model.Email, 0)
 
 	for rows.Next() {
-		var s model.EmailSummary
+		var s model.Email
 		if err := rows.Scan(
 			&s.ID,
 			&s.Sender,

@@ -2,6 +2,7 @@ package controller
 
 import (
 	"encoding/json"
+	"moment-mail-server/internal/inbox/controller/responses"
 	"net/http"
 	"strconv"
 )
@@ -60,10 +61,10 @@ func (i *inboxController) GetEmailsByInboxId(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	response := EmailsSUmmaryResponse{
-		Page:   page,
-		Limit:  limit,
-		Emails: res,
+	response := responses.EmailSummariesResponse{
+		Page:           page,
+		Limit:          limit,
+		EmailSummaries: res,
 	}
 
 	w.Header().Set("Content-Type", "application/json")
