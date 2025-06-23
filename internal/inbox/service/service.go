@@ -41,7 +41,7 @@ func (iu *InboxService) CreateInbox() (model.Inbox, error) {
 	return res, nil
 }
 
-func (iu *InboxService) GetEmailSummaries(inboxId string, limit int, offset int) ([]dto.EmailSummary, error) {
+func (iu *InboxService) GetEmailSummaries(inboxId uuid.UUID, limit int, offset int) ([]dto.EmailSummary, error) {
 	emails, err := iu.repository.GetEmailSummaries(inboxId, limit, offset)
 	if err != nil {
 		return []dto.EmailSummary{}, err
@@ -53,15 +53,15 @@ func (iu *InboxService) GetEmailSummaries(inboxId string, limit int, offset int)
 			ID:         email.ID,
 			Subject:    email.Subject,
 			Sender:     email.Sender,
-			RecievedAt: email.RecievedAt,
+			RecievedAt: email.ReceivedAt,
 		}
 	}
 
 	return summaries, nil
 }
 
-func (iu *InboxService) GetEmail(emailId string) (dto.Email, error) {
-	emailModel, err := iu.repository.GetEmail(emailId)
+func (iu *InboxService) GetEmail(inboxId uuid.UUID, emailId uuid.UUID) (dto.Email, error) {
+	emailModel, err := iu.repository.GetEmail(inboxId, emailId)
 	if err != nil {
 		return dto.Email{}, err
 	}
@@ -70,8 +70,9 @@ func (iu *InboxService) GetEmail(emailId string) (dto.Email, error) {
 		ID:         emailModel.ID,
 		Subject:    emailModel.Subject,
 		Sender:     emailModel.Sender,
-		RecievedAt: emailModel.RecievedAt,
+		RecievedAt: emailModel.ReceivedAt,
 		Body:       emailModel.Body,
+		InboxID:    emailModel.InboxID,
 	}
 
 	return email, nil

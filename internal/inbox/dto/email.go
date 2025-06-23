@@ -12,4 +12,5 @@ type Email struct {
 	Subject    string    `json:"subject"`
 	RecievedAt time.Time `json:"recievedAt"`
 	Body       string    `json:"body"`
+	InboxID    uuid.UUID `json:"inboxId"`
 }

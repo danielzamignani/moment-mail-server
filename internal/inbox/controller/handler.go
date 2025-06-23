@@ -5,6 +5,8 @@ import (
 	"moment-mail-server/internal/inbox/controller/responses"
 	"net/http"
 	"strconv"
+
+	"github.com/google/uuid"
 )
 
 type inboxController struct {
@@ -35,7 +37,14 @@ func (i *inboxController) CreateInbox(w http.ResponseWriter, r *http.Request) {
 }
 
 func (i *inboxController) GetEmailSummaries(w http.ResponseWriter, r *http.Request) {
-	inboxId := r.PathValue("id")
+	inboxIdStr := r.PathValue("inboxId")
+
+	inboxId, err := uuid.Parse(inboxIdStr)
+	if err != nil {
+		http.Error(w, "Invalid inbox ID", http.StatusBadRequest)
+		return
+	}
+
 	query := r.URL.Query()
 
 	limit, err := strconv.Atoi(query.Get("limit"))
@@ -73,9 +82,22 @@ func (i *inboxController) GetEmailSummaries(w http.ResponseWriter, r *http.Reque
 }
 
 func (i *inboxController) GetEmail(w http.ResponseWriter, r *http.Request) {
-	emailId := r.PathValue("id")
+	inboxIdStr := r.PathValue("inboxId")
+	emailIdStr := r.PathValue("emailId")
 
-	res, err := i.inboxService.GetEmail(emailId)
+	inboxId, err := uuid.Parse(inboxIdStr)
+	if err != nil {
+		http.Error(w, "Invalid inbox ID", http.StatusBadRequest)
+		return
+	}
+
+	emailId, err := uuid.Parse(emailIdStr)
+	if err != nil {
+		http.Error(w, "Invalid email ID", http.StatusBadRequest)
+		return
+	}
+
+	res, err := i.inboxService.GetEmail(inboxId, emailId)
 	if err != nil {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusInternalServerError)

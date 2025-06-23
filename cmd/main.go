@@ -24,8 +24,8 @@ func main() {
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("POST /api/inbox", InboxController.CreateInbox)
-	mux.HandleFunc("GET /api/inbox/{id}/emails", InboxController.GetEmailSummaries)
-	mux.HandleFunc("GET /api/inbox/{id}/email", InboxController.GetEmail)
+	mux.HandleFunc("GET /api/inbox/{inboxId}/emails", InboxController.GetEmailSummaries)
+	mux.HandleFunc("GET /api/inbox/{inboxId}/emails/{emailId}", InboxController.GetEmail)
 
 	server := &http.Server{
 		Addr:    ":8080",
@@ -34,5 +34,4 @@ func main() {
 
 	log.Println("Server is running on port", 8080)
 	server.ListenAndServe()
-
 }

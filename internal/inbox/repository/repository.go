@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"moment-mail-server/internal/inbox/model"
 
+	"github.com/google/uuid"
+	"github.com/jackc/pgx"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -30,7 +32,7 @@ func (ir *InboxRepository) CreateInbox(inbox model.Inbox) error {
 	return nil
 }
 
-func (ir *InboxRepository) GetEmailSummaries(inboxId string, limit int, offset int) ([]model.Email, error) {
+func (ir *InboxRepository) GetEmailSummaries(inboxId uuid.UUID, limit int, offset int) ([]model.Email, error) {
 	const query = `
         SELECT id, sender, subject, received_at
         FROM emails
@@ -53,7 +55,7 @@ func (ir *InboxRepository) GetEmailSummaries(inboxId string, limit int, offset i
 			&s.ID,
 			&s.Sender,
 			&s.Subject,
-			&s.RecievedAt,
+			&s.ReceivedAt,
 		); err != nil {
 			return nil, fmt.Errorf("failed to scan email summary: %w", err)
 		}
@@ -67,26 +69,30 @@ func (ir *InboxRepository) GetEmailSummaries(inboxId string, limit int, offset i
 	return summaries, nil
 }
 
-func (ir *InboxRepository) GetEmail(emailId string) (model.Email, error) {
+func (ir *InboxRepository) GetEmail(inboxId uuid.UUID, emailId uuid.UUID) (model.Email, error) {
 	const query = `
-		SELECT id, received_at, sender, subject, body
-		FROM emails
-		WHERE id = $1
-	`
+        SELECT id, received_at, sender, subject, body, inbox_id
+        FROM emails
+        WHERE id = $1 AND inbox_id = $2
+    `
 
-	row := ir.connection.QueryRow(context.Background(), query, emailId)
+	row := ir.connection.QueryRow(context.Background(), query, emailId, inboxId)
+
 	var email model.Email
 	if err := row.Scan(
 		&email.ID,
-		&email.RecievedAt,
+		&email.ReceivedAt,
 		&email.Sender,
 		&email.Subject,
 		&email.Body,
+		&email.InboxID,
 	); err != nil {
-		return model.Email{}, fmt.Errorf("failed to scan email summary: %w", err)
-	}
+		if err == pgx.ErrNoRows {
+			return model.Email{}, fmt.Errorf("email not found")
+		}
 
-	println(email.Body)
+		return model.Email{}, fmt.Errorf("failed to scan email: %w", err)
+	}
 
 	return email, nil
 }
