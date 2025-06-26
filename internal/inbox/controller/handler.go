@@ -25,68 +25,66 @@ func NewInboxController(service InboxService, broker *broker.EventBroker) inboxC
 }
 
 func (i *inboxController) CreateInbox(w http.ResponseWriter, r *http.Request) {
-	inbox, err := i.inboxService.CreateInbox()
+	ctx := r.Context()
+	inbox, err := i.inboxService.CreateInbox(ctx)
+
+	w.Header().Set("Content-Type", "application/json")
+
 	if err != nil {
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusCreated)
+		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(map[string]string{
 			"message": err.Error(),
 		})
-
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
+	response := responses.InboxResponse{
+		ID:        inbox.ID,
+		Address:   inbox.Address,
+		CreatedAt: inbox.CreatedAt,
+		ExpiresAt: inbox.ExpiresAt,
+	}
+
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(inbox)
+	json.NewEncoder(w).Encode(response)
 }
 
 func (i *inboxController) GetEmailSummaries(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
 	inboxIdStr := r.PathValue("inboxId")
-
 	inboxId, err := uuid.Parse(inboxIdStr)
 	if err != nil {
 		http.Error(w, "Invalid inbox ID", http.StatusBadRequest)
 		return
 	}
-
 	query := r.URL.Query()
-
 	limit, err := strconv.Atoi(query.Get("limit"))
 	if err != nil || limit < 1 || limit > 100 {
 		limit = 20
 	}
-
-	page, err := strconv.Atoi(r.URL.Query().Get("page"))
+	page, err := strconv.Atoi(query.Get("page"))
 	if err != nil || page < 1 {
 		page = 1
 	}
-
 	offset := (page - 1) * limit
 
-	res, err := i.inboxService.GetEmailSummaries(inboxId, limit, offset)
+	response, err := i.inboxService.GetEmailSummaries(ctx, inboxId, limit, offset)
+	w.Header().Set("Content-Type", "application/json")
 	if err != nil {
-		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(map[string]string{
 			"message": err.Error(),
 		})
-
 		return
 	}
-
-	response := responses.EmailSummariesResponse{
-		Page:           page,
-		Limit:          limit,
-		EmailSummaries: res,
-	}
-
-	w.Header().Set("Content-Type", "application/json")
+	response.Page = page
+	response.Limit = limit
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(response)
 }
 
 func (i *inboxController) GetEmail(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
 	inboxIdStr := r.PathValue("inboxId")
 	emailIdStr := r.PathValue("emailId")
 
@@ -102,20 +100,16 @@ func (i *inboxController) GetEmail(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	res, err := i.inboxService.GetEmail(inboxId, emailId)
+	response, err := i.inboxService.GetEmail(ctx, inboxId, emailId)
+	w.Header().Set("Content-Type", "application/json")
 	if err != nil {
-		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(map[string]string{
 			"message": err.Error(),
 		})
-
 		return
 	}
 
-	response := res
-
-	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(response)
 }

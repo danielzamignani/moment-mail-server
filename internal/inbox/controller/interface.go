@@ -1,14 +1,14 @@
 package controller
 
 import (
-	"moment-mail-server/internal/inbox/dto"
-	"moment-mail-server/internal/inbox/model"
+	"context"
+	"moment-mail-server/internal/inbox/controller/responses"
 
 	"github.com/google/uuid"
 )
 
 type InboxService interface {
-	CreateInbox() (model.Inbox, error)
-	GetEmailSummaries(inboxId uuid.UUID, limit int, offset int) ([]dto.EmailSummary, error)
-	GetEmail(inboxId uuid.UUID, emailId uuid.UUID) (dto.Email, error)
+	CreateInbox(ctx context.Context) (responses.InboxResponse, error)
+	GetEmailSummaries(ctx context.Context, inboxId uuid.UUID, limit int, offset int) (responses.EmailSummariesResponse, error)
+	GetEmail(ctx context.Context, inboxId uuid.UUID, emailId uuid.UUID) (responses.EmailResponse, error)
 }

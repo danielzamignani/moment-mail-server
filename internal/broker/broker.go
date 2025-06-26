@@ -48,7 +48,6 @@ func (b *EventBroker) Unsubscribe(inboxId uuid.UUID) {
 func (b *EventBroker) Publish(inboxId uuid.UUID, event Event) {
 	b.mutex.Lock()
 	defer b.mutex.Unlock()
-	log.Printf("mensagem publicada patrao", inboxId)
 
 	if ch, ok := b.clients[inboxId]; ok {
 		ch <- event
