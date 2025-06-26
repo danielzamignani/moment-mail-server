@@ -2,6 +2,9 @@ package controller
 
 import (
 	"encoding/json"
+	"fmt"
+	"log"
+	"moment-mail-server/internal/broker"
 	"moment-mail-server/internal/inbox/controller/responses"
 	"net/http"
 	"strconv"
@@ -11,11 +14,13 @@ import (
 
 type inboxController struct {
 	inboxService InboxService
+	broker       *broker.EventBroker
 }
 
-func NewInboxController(service InboxService) inboxController {
+func NewInboxController(service InboxService, broker *broker.EventBroker) inboxController {
 	return inboxController{
 		inboxService: service,
+		broker:       broker,
 	}
 }
 
@@ -113,4 +118,58 @@ func (i *inboxController) GetEmail(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(response)
+}
+
+func (i *inboxController) EventHandler(w http.ResponseWriter, r *http.Request) {
+	inboxIdStr := r.PathValue("inboxId")
+
+	inboxId, err := uuid.Parse(inboxIdStr)
+	if err != nil {
+		http.Error(w, "Invalid inbox ID", http.StatusBadRequest)
+		return
+	}
+
+	w.Header().Set("Content-Type", "text/event-stream")
+	w.Header().Set("Cache-Control", "no-cache")
+	w.Header().Set("Connection", "keep-alive")
+
+	i.broker.Subscribe(inboxId)
+
+	messageChan := i.broker.Subscribe(inboxId)
+
+	defer i.broker.Unsubscribe(inboxId)
+
+	for {
+		select {
+		case event, ok := <-messageChan:
+			if !ok {
+				return
+			}
+
+			fmt.Fprintf(w, "event: %s\n", event.Type)
+			fmt.Fprintf(w, "data: \n\n")
+
+			if f, ok := w.(http.Flusher); ok {
+				f.Flush()
+			}
+
+		case <-r.Context().Done():
+			log.Printf("INFO: Client %s desconected.", inboxId)
+			return
+		}
+	}
+}
+
+func (i *inboxController) TestPublishHandler(w http.ResponseWriter, r *http.Request) {
+	inboxId, _ := uuid.Parse(r.PathValue("inboxId"))
+
+	event := broker.Event{
+		Type: "new_email",
+	}
+
+	i.broker.Publish(inboxId, event)
+
+	w.WriteHeader(http.StatusOK)
+
+	w.Write([]byte("Event publish for client"))
 }

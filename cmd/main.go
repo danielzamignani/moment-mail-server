@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"moment-mail-server/db"
+	"moment-mail-server/internal/broker"
 	"moment-mail-server/internal/inbox/controller"
 	"moment-mail-server/internal/inbox/repository"
 	"moment-mail-server/internal/inbox/service"
@@ -20,12 +21,15 @@ func main() {
 	dbConnection := db.ConnectDB()
 	InboxRepository := repository.NewInboxRepository(dbConnection)
 	InboxService := service.NewInboxService(InboxRepository)
-	InboxController := controller.NewInboxController(InboxService)
+	Broker := broker.NewEventBroker()
+	InboxController := controller.NewInboxController(InboxService, Broker)
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("POST /api/inbox", InboxController.CreateInbox)
 	mux.HandleFunc("GET /api/inbox/{inboxId}/emails", InboxController.GetEmailSummaries)
 	mux.HandleFunc("GET /api/inbox/{inboxId}/emails/{emailId}", InboxController.GetEmail)
+	mux.HandleFunc("GET /api/events/{inboxId}", InboxController.EventHandler)
+	mux.HandleFunc("POST /test/publish", InboxController.TestPublishHandler)
 
 	server := &http.Server{
 		Addr:    ":8080",
