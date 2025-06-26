@@ -30,6 +30,7 @@ func main() {
 	mux.HandleFunc("GET /api/inbox/{inboxId}/emails/{emailId}", inboxController.GetEmail)
 	mux.HandleFunc("GET /api/events/{inboxId}", inboxController.EventHandler)
 	mux.HandleFunc("POST /test/publish", inboxController.TestPublishHandler)
+	mux.HandleFunc("DELETE /api/inbox/{inboxId}", inboxController.DeleteInbox)
 
 	server := &http.Server{
 		Addr:    ":8080",

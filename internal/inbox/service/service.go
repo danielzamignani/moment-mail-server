@@ -87,3 +87,12 @@ func (iu *InboxService) GetEmail(ctx context.Context, inboxId uuid.UUID, emailId
 		InboxID:    emailModel.InboxID,
 	}, nil
 }
+
+func (iu *InboxService) DeleteInbox(ctx context.Context, inboxId uuid.UUID) error {
+	err := iu.repository.DeleteInbox(ctx, inboxId)
+	if err != nil {
+		return fmt.Errorf("service: failed to delete inbox: %w", err)
+	}
+
+	return nil
+}

@@ -167,3 +167,25 @@ func (i *inboxController) TestPublishHandler(w http.ResponseWriter, r *http.Requ
 
 	w.Write([]byte("Event publish for client"))
 }
+
+func (i *inboxController) DeleteInbox(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	inboxIdStr := r.PathValue("inboxId")
+
+	inboxId, err := uuid.Parse(inboxIdStr)
+	if err != nil {
+		http.Error(w, "Invalid inbox ID", http.StatusBadRequest)
+		return
+	}
+
+	err = i.inboxService.DeleteInbox(ctx, inboxId)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
+}

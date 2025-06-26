@@ -95,3 +95,14 @@ func (ir *InboxRepository) GetEmail(ctx context.Context, inboxId uuid.UUID, emai
 
 	return email, nil
 }
+
+func (ir *InboxRepository) DeleteInbox(ctx context.Context, inboxId uuid.UUID) error {
+	const query = `DELETE FROM inboxes WHERE id = $1`
+
+	_, err := ir.connection.Exec(ctx, query, inboxId)
+	if err != nil {
+		return fmt.Errorf("failed to delete inbox %s: %w", inboxId, err)
+	}
+
+	return nil
+}
