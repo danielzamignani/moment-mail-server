@@ -6,8 +6,11 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/danielzamignani/moment-mail-server/internal/app/service"
 	"github.com/danielzamignani/moment-mail-server/internal/config"
+	"github.com/danielzamignani/moment-mail-server/internal/domain/inbox"
 	"github.com/danielzamignani/moment-mail-server/internal/infra/database/postgres"
+	"github.com/danielzamignani/moment-mail-server/internal/presentation/http/handlers"
 	"github.com/joho/godotenv"
 )
 
@@ -18,14 +21,18 @@ func main() {
 
 	config := config.Load()
 
-	_, err := postgres.NewDatabase(context.Background(), config.Database)
+	database, err := postgres.NewDatabase(context.Background(), config.Database)
 
 	if err != nil {
 		log.Fatalf("Database connection failed: %v", err)
 	}
 
+	inboxReposiroty := inbox.NewInboxRepository(database)
+	inboxService := service.NewInboxService(inboxReposiroty)
+	inboxHandler := handlers.NewInboxHandler(inboxService)
+
 	mux := http.NewServeMux()
-	mux.HandleFunc("GET /", ExampleHandler)
+	mux.HandleFunc("POST /v1/inbox", inboxHandler.CreateInbox)
 
 	server := &http.Server{
 		Addr:    fmt.Sprintf(":%v", config.Server.Port),
@@ -36,8 +43,4 @@ func main() {
 	if err := server.ListenAndServe(); err != nil {
 		log.Fatalf("Error: could not start server: %v", err)
 	}
-}
-
-func ExampleHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintln(w, "Test")
 }
