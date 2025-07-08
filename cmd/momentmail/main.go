@@ -32,6 +32,7 @@ func main() {
 	inboxHandler := handlers.NewInboxHandler(inboxService)
 
 	mux := http.NewServeMux()
+	mux.HandleFunc("DELETE /v1/inbox/{inboxID}", inboxHandler.DeleteInbox)
 	mux.HandleFunc("POST /v1/inbox", inboxHandler.CreateInbox)
 
 	server := &http.Server{

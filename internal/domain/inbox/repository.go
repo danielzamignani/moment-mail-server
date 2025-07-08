@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/danielzamignani/moment-mail-server/internal/infra/database/postgres"
+	"github.com/google/uuid"
 )
 
 type InboxRepository struct {
@@ -32,6 +33,17 @@ func (inboxRepository *InboxRepository) CreateInbox(ctx context.Context, inbox I
 
 	if err != nil {
 		return fmt.Errorf("failed to insert new inbox into the database: %v", err)
+	}
+
+	return nil
+}
+
+func (inboxRepository *InboxRepository) DeleteInbox(ctx context.Context, inboxID uuid.UUID) error {
+	query := `DELETE FROM inboxes WHERE id = $1`
+
+	_, err := inboxRepository.database.Pool.Exec(ctx, query, inboxID)
+	if err != nil {
+		return fmt.Errorf("failed to delete inbox")
 	}
 
 	return nil

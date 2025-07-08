@@ -39,7 +39,10 @@ func (inboxService *InboxService) CreateInbox(ctx context.Context) (dto.InboxRes
 		ExpiresAt:    now.Add(10 * time.Minute),
 	}
 
-	inboxService.inboxRepository.CreateInbox(ctx, inbox)
+	err = inboxService.inboxRepository.CreateInbox(ctx, inbox)
+	if err != nil {
+		return dto.InboxResponse{}, err
+	}
 
 	return dto.InboxResponse{
 		ID:           inbox.ID,
@@ -47,6 +50,15 @@ func (inboxService *InboxService) CreateInbox(ctx context.Context) (dto.InboxRes
 		CreatedAt:    inbox.CreatedAt,
 		ExpiresAt:    inbox.ExpiresAt,
 	}, nil
+}
+
+func (inboxService *InboxService) DeleteInbox(ctx context.Context, inboxID uuid.UUID) error {
+	err := inboxService.inboxRepository.DeleteInbox(ctx, inboxID)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (inboxService *InboxService) generateEmailAddress() string {
