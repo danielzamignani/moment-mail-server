@@ -8,6 +8,7 @@ import (
 
 	"github.com/danielzamignani/moment-mail-server/internal/app/service"
 	"github.com/danielzamignani/moment-mail-server/internal/config"
+	"github.com/danielzamignani/moment-mail-server/internal/domain/email"
 	"github.com/danielzamignani/moment-mail-server/internal/domain/inbox"
 	"github.com/danielzamignani/moment-mail-server/internal/infra/database/postgres"
 	"github.com/danielzamignani/moment-mail-server/internal/presentation/http/handlers"
@@ -27,13 +28,20 @@ func main() {
 		log.Fatalf("Database connection failed: %v", err)
 	}
 
+	mux := http.NewServeMux()
+
 	inboxReposiroty := inbox.NewInboxRepository(database)
 	inboxService := service.NewInboxService(inboxReposiroty)
 	inboxHandler := handlers.NewInboxHandler(inboxService)
 
-	mux := http.NewServeMux()
-	mux.HandleFunc("DELETE /v1/inbox/{inboxID}", inboxHandler.DeleteInbox)
+	emailRepository := email.NewEmailRepository(database)
+	emailService := service.NewEmailService(emailRepository)
+	emailHandler := handlers.NewEmailHandler(emailService)
+
 	mux.HandleFunc("POST /v1/inbox", inboxHandler.CreateInbox)
+	mux.HandleFunc("DELETE /v1/inbox/{inboxID}", inboxHandler.DeleteInbox)
+	mux.HandleFunc("GET /v1/inbox/{inboxID}/emails", emailHandler.GetEmailsSummaries)
+	mux.HandleFunc("GET /v1/inbox/{inboxID}/emails/{emailID}", emailHandler.GetEmail)
 
 	server := &http.Server{
 		Addr:    fmt.Sprintf(":%v", config.Server.Port),
