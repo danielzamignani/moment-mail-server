@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/danielzamignani/moment-mail-server/internal/app/service"
+	"github.com/danielzamignani/moment-mail-server/internal/broker"
 	"github.com/danielzamignani/moment-mail-server/internal/config"
 	"github.com/danielzamignani/moment-mail-server/internal/domain/email"
 	"github.com/danielzamignani/moment-mail-server/internal/domain/inbox"
@@ -30,9 +31,11 @@ func main() {
 
 	mux := http.NewServeMux()
 
+	broker := broker.NewEventBroker()
+
 	inboxReposiroty := inbox.NewInboxRepository(database)
 	inboxService := service.NewInboxService(inboxReposiroty)
-	inboxHandler := handlers.NewInboxHandler(inboxService)
+	inboxHandler := handlers.NewInboxHandler(inboxService, broker)
 
 	emailRepository := email.NewEmailRepository(database)
 	emailService := service.NewEmailService(emailRepository)
@@ -40,6 +43,8 @@ func main() {
 
 	mux.HandleFunc("POST /v1/inbox", inboxHandler.CreateInbox)
 	mux.HandleFunc("DELETE /v1/inbox/{inboxID}", inboxHandler.DeleteInbox)
+	mux.HandleFunc("GET /v1/events/{inboxID}", inboxHandler.EventHandler)
+	mux.HandleFunc("POST /test/{inboxID}/publish", inboxHandler.TestPublishHandler)
 	mux.HandleFunc("GET /v1/inbox/{inboxID}/emails", emailHandler.GetEmailsSummaries)
 	mux.HandleFunc("GET /v1/inbox/{inboxID}/emails/{emailID}", emailHandler.GetEmail)
 
