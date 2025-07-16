@@ -61,6 +61,15 @@ func (inboxService *InboxService) DeleteInbox(ctx context.Context, inboxID uuid.
 	return nil
 }
 
+func (inboxService *InboxService) GetInboxByID(ctx context.Context, inboxID uuid.UUID) (inbox.Inbox, error) {
+	inboxObj, err := inboxService.inboxRepository.GetInboxByID(ctx, inboxID)
+	if err != nil {
+		return inbox.Inbox{}, err
+	}
+
+	return inboxObj, nil
+}
+
 func (inboxService *InboxService) generateEmailAddress() string {
 	username := fmt.Sprintf("momentuser%d", rand.Intn(100000))
 	domain := os.Getenv("EMAIL_DOMAIN")

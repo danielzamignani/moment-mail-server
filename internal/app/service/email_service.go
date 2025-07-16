@@ -34,3 +34,12 @@ func (emailService *EmailService) GetEmail(ctx context.Context, inboxID uuid.UUI
 
 	return emailObj, nil
 }
+
+func (emailService *EmailService) SaveEmail(ctx context.Context, email email.Email) error {
+	err := emailService.emailRepository.SaveEmail(ctx, email)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

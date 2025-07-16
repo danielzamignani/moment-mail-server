@@ -77,3 +77,17 @@ func (emailRepository *EmailRepository) GetEmail(ctx context.Context, inboxID uu
 
 	return email, nil
 }
+
+func (emailRepository *EmailRepository) SaveEmail(ctx context.Context, email Email) error {
+	query := `
+		INSERT INTO emails (id, sender, subject, received_at, inbox_id, body)
+		VALUES ($1, $2, $3, $4, $5, $6)
+	`
+	_, err := emailRepository.database.Pool.Exec(ctx, query, email.ID, email.Sender, email.Subject, email.ReceivedAt, email.InboxID, email.Body)
+
+	if err != nil {
+		return fmt.Errorf("failed to insert new email into the database: %v", err)
+	}
+
+	return nil
+}

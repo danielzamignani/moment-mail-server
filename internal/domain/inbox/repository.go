@@ -48,3 +48,24 @@ func (inboxRepository *InboxRepository) DeleteInbox(ctx context.Context, inboxID
 
 	return nil
 }
+
+func (inboxRepository *InboxRepository) GetInboxByID(ctx context.Context, inboxID uuid.UUID) (Inbox, error) {
+	query := `
+		SELECT *
+		FROM inboxes
+		WHERE id = $1
+	`
+	var inbox Inbox
+	err := inboxRepository.database.Pool.QueryRow(ctx, query, inboxID).Scan(
+		&inbox.ID,
+		&inbox.EmailAddress,
+		&inbox.ExpiresAt,
+		&inbox.CreatedAt,
+	)
+
+	if err != nil {
+		return Inbox{}, fmt.Errorf("failed to get inbox in database: %v", err)
+	}
+
+	return inbox, nil
+}
